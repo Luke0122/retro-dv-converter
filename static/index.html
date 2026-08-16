@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>00年代时光机</title>
+<style>
+  :root {
+    --bg1: #0b1220;
+    --bg2: #14213d;
+    --panel: rgba(255,255,255,0.055);
+    --panel2: rgba(255,255,255,0.09);
+    --line: rgba(255,255,255,0.14);
+    --txt: #e8eef7;
+    --dim: #93a3bd;
+    --cyan: #4fc3f7;
+    --orange: #f5a623;
+    --pink: #f472b6;
+    --green: #4ade80;
+    --red: #f87171;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    color: var(--txt);
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(79,195,247,0.16), transparent 60%),
+      radial-gradient(900px 500px at 5% 110%, rgba(245,166,35,0.12), transparent 60%),
+      linear-gradient(160deg, var(--bg1), var(--bg2) 70%);
+    min-height: 100vh;
+    padding: 24px 20px 40px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .verwarn { background: rgba(248,113,113,0.12); border: 1px solid var(--red);
+    color: var(--red); border-radius: 10px; padding: 10px 14px; font-size: 13px;
+    margin-bottom: 14px; }
+  header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+  header h1 {
+    font-size: 30px; letter-spacing: 1px;
+    background: linear-gradient(90deg, var(--cyan), var(--pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 24px rgba(79,195,247,0.35);
+  }
+  header .sub { color: var(--dim); font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px; }
+  @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px; backdrop-filter: blur(6px);
+  }
+  .card h2 { font-size: 15px; margin-bottom: 12px; color: var(--cyan); letter-spacing: 1px; }
+  .drop {
+    border: 2px dashed rgba(79,195,247,0.45); border-radius: var(--radius);
+    padding: 34px 18px; text-align: center; cursor: pointer; transition: all .18s;
+  }
+  .drop:hover, .drop.drag { border-color: var(--orange); background: rgba(245,166,35,0.07); }
+  .drop .big { font-size: 40px; }
+  .drop p { color: var(--dim); margin-top: 8px; font-size: 13px; }
+  .drop b { color: var(--txt); }
+  .files { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow: auto; }
+  .frow {
+    display: flex; align-items: center; gap: 12px; padding: 8px 10px;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
+  }
+  .thumb { width: 54px; height: 42px; border-radius: 6px; object-fit: cover; background: #000; flex: 0 0 auto; }
+  .fmeta { flex: 1; min-width: 0; }
+  .fname { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fsub { font-size: 12px; color: var(--dim); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .chip { padding: 1px 8px; border-radius: 20px; font-size: 11px; }
+  .chip.photo { background: rgba(79,195,247,0.18); color: var(--cyan); }
+  .chip.video { background: rgba(244,114,182,0.18); color: var(--pink); }
+  .st { font-size: 12px; white-space: nowrap; }
+  .st.running { color: var(--orange); }
+  .st.done { color: var(--green); }
+  .st.error { color: var(--red); }
+  .mini { width: 80px; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; flex: 0 0 auto; }
+  .mini i { display: block; height: 100%; background: var(--cyan); width: 0%; transition: width .3s; }
+  .presets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .preset {
+    border: 2px solid var(--line); border-radius: 10px; padding: 10px; cursor: pointer;
+    text-align: left; background: transparent; color: var(--txt); transition: all .15s; font-family: inherit;
+  }
+  .preset:hover { border-color: var(--cyan); }
+  .preset.sel { border-color: var(--orange); background: rgba(245,166,35,0.10); }
+  .preset b { font-size: 14px; display: block; }
+  .preset span { font-size: 12px; color: var(--dim); display: block; margin-top: 4px; line-height: 1.5; }
+  .slider-row { margin-top: 14px; }
+  .slider-row label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .slider-row label span { color: var(--orange); font-weight: 700; }
+  input[type=range] { width: 100%; accent-color: var(--cyan); }
+  .hint { font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .opt-row { margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .opt-row input { accent-color: var(--cyan); width: 16px; height: 16px; }
+  .wm-row { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .wm-row input[type=text] {
+    flex: 1; background: rgba(255,255,255,0.08); border: 1px solid var(--line);
+    color: var(--txt); border-radius: 8px; padding: 8px 10px; font-size: 14px; font-family: inherit;
+  }
+  .wm-row input[type=text]:focus { outline: none; border-color: var(--cyan); }
+  .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50;
+    display: flex; align-items: center; justify-content: center; }
+  .modal { width: min(560px, 92vw); max-height: 76vh; background: #101a2c;
+    border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex;
+    flex-direction: column; gap: 10px; }
+  .modal-title { font-size: 13px; color: var(--dim); word-break: break-all; }
+  .modal-list { overflow: auto; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .modal-list button { text-align: left; padding: 8px 10px; border-radius: 8px;
+    background: var(--panel2); border: 1px solid var(--line); color: var(--txt);
+    cursor: pointer; font-size: 13px; font-family: inherit; }
+  .modal-list button:hover { border-color: var(--cyan); }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+  .btns { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  button.action {
+    border: 0; border-radius: 10px; padding: 11px 22px; font-size: 15px; cursor: pointer;
+    font-family: inherit; transition: all .15s; font-weight: 700;
+  }
+  .go { background: linear-gradient(90deg, var(--cyan), #2f9fd8); color: #06121f; }
+  .go:hover { filter: brightness(1.12); }
+  .go:disabled { opacity: .45; cursor: not-allowed; }
+  .ghost { background: var(--panel2); color: var(--txt); border: 1px solid var(--line); }
+  .ghost:hover { border-color: var(--red); color: var(--red); }
+  .ghost:disabled { opacity: .45; cursor: not-allowed; }
+  .clear { background: transparent; color: var(--dim); border: 1px solid var(--line); }
+  .clear:hover { color: var(--txt); }
+  .progress-card { margin-top: 14px; }
+  .pbar { height: 12px; border-radius: 8px; background: rgba(255,255,255,0.10); overflow: hidden; }
+  .pbar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--cyan), var(--pink)); transition: width .25s; }
+  .pinfo { margin-top: 8px; font-size: 13px; color: var(--dim); min-height: 20px; }
+  .results { display: flex; flex-direction: column; gap: 12px; max-height: 560px; overflow: auto; margin-top: 4px; }
+  .res { background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+  .res img, .res video { width: 100%; max-height: 260px; object-fit: contain; border-radius: 8px; background: #000; }
+  .res .rtitle { font-size: 13px; margin: 8px 2px 2px; display: flex; justify-content: space-between; gap: 10px; }
+  .res a { color: var(--cyan); text-decoration: none; font-size: 12px; white-space: nowrap; }
+  .res a:hover { text-decoration: underline; }
+  .empty { color: var(--dim); font-size: 13px; padding: 24px 0; text-align: center; }
+  footer { margin-top: 22px; color: var(--dim); font-size: 12px; line-height: 1.8; }
+  footer code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📼 00年代时光机</h1>
+    <span class="sub">照片 / 视频一键穿越回千禧年</span>
+  </header>
+  <div class="verwarn" id="verWarn" style="display:none">⚠ 页面与服务器版本不一致：请关闭工具窗口（或结束 pythonw.exe）后，重新双击「启动00年代转换器.bat」，并 Ctrl+F5 刷新本页</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>① 放入文件</h2>
+      <div class="drop" id="drop">
+        <div class="big">📁</div>
+        <p><b>拖入照片或视频</b>，或点击选择文件</p>
+        <p style="margin-top:4px">支持 jpg / png / webp / gif / bmp / dng（相机 RAW）/ heic，以及 mp4 / mov / mkv / avi / webm</p>
+        <input type="file" id="picker" multiple accept="image/*,video/*,.jpg,.jpeg,.png,.bmp,.webp,.gif,.dng,.cr2,.cr3,.nef,.arw,.raf,.orf,.rw2,.pef,.srw,.heic,.heif,.mp4,.mov,.mkv,.avi,.webm" hidden>
+      </div>
+      <div class="files" id="files"></div>
+
+      <h2 style="margin-top:16px">② 选择风格</h2>
+      <div class="presets" id="presets"></div>
+
+      <h2 style="margin-top:16px">③ 调节效果</h2>
+      <button class="action clear" id="advToggle" style="width:100%; text-align:left">▸ 展开高级调节（画质 / 年代感强度）</button>
+      <div id="advPanel" style="display:none; margin-top:12px">
+        <div class="slider-row">
+          <label>画质（越高越清晰，越低压缩越狠）<span id="qv">100</span></label>
+          <input type="range" id="quality" min="0" max="100" value="100">
+          <div class="hint">画质 0 = 最狠压缩（满屏马赛克感），100 = 接近原清晰度</div>
+        </div>
+        <div class="slider-row">
+          <label>年代感强度<span id="sv">70</span></label>
+          <input type="range" id="strength" min="0" max="100" value="70">
+          <div class="hint">越强：颗粒与伪影越重；视频输出 4:3（横版 960x720 / 竖版 720x960）或保持原比例 / 30fps</div>
+        </div>
+      </div>
+      <div class="opt-row">
+        <input type="checkbox" id="c43Chk">
+        <label for="c43Chk" style="margin:0">裁切为 4:3 画幅（关闭则保持视频原始比例）</label>
+      </div>
+      <div class="opt-row" id="oriRow">
+        <span>画幅方向：</span>
+        <label style="margin:0"><input type="radio" name="ori" value="h" checked> 横版 4:3（960x720）</label>
+        <label style="margin:0"><input type="radio" name="ori" value="v"> 竖版 4:3（720x960）</label>
+      </div>
+      <div class="opt-row">
+        <input type="checkbox" id="tsChk" checked>
+        <label for="tsChk" style="margin:0">添加日期水印（右下角点阵 OSD；留空自动用处理时间）</label>
+      </div>
+      <div class="wm-row">
+        <span>水印内容</span>
+        <input type="text" id="wmInput" value="" placeholder="留空则自动使用处理文件时的当前时间">
+      </div>
+      <div class="wm-row">
+        <span>输出位置</span>
+        <input type="text" id="outPath" value="">
+        <button class="action clear" id="browseBtn" style="padding:8px 12px; flex:0 0 auto">浏览…</button>
+      </div>
+      <div class="hint">输出目录会在转换时自动创建；原文件不会被改动</div>
+
+      <div class="btns">
+        <button class="action go" id="startBtn">开始转换</button>
+        <button class="action ghost" id="cancelBtn" disabled>取消当前</button>
+        <button class="action clear" id="clearBtn">清空列表</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>④ 进度</h2>
+      <div class="progress-card">
+        <div class="pbar"><i id="pbar"></i></div>
+        <div class="pinfo" id="pinfo">添加文件后，点「开始转换」即可处理</div>
+      </div>
+      <h2 style="margin-top:18px">已完成</h2>
+      <div class="results" id="results"><div class="empty">转换结果会显示在这里，并保存到你设置的输出目录</div></div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="dirModal" style="display:none">
+    <div class="modal">
+      <div class="modal-title" id="dirCurrent">…</div>
+      <div class="modal-list" id="dirList"></div>
+      <div class="modal-btns">
+        <button class="action clear" id="dirUp">上级</button>
+        <button class="action go" id="dirSelect" style="padding:9px 18px">选择此文件夹</button>
+        <button class="action clear" id="dirCancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    输出位置可在界面自定义（默认：程序目录下的「输出」文件夹；照片 JPG、视频 MP4 都放这里，原文件不会被覆盖，重名自动加序号）<br>
+    任务按顺序逐个处理；若状态长时间不变化，页面会自动轮询服务器兜底。遇到问题可在浏览器按 F12 查看控制台信息。
+  </footer>
+</div>
+
+<script>
+"use strict";
+const PAGE_VERSION = "2026-08-16-v2";
+
+if (location.protocol === "file:") {
+  document.getElementById("pinfo").textContent = "⚠ 请通过「启动00年代转换器.bat」打开本工具，不要直接双击 index.html";
+  document.getElementById("startBtn").disabled = true;
+}
+
+const $ = (id) => document.getElementById(id);
+
+const state = {
+  files: [],
+  fileJob: {},          // jobId -> fileIndex
+  activeJob: null,
+  preset: "dv",
+  quality: 100,
+  strength: 70,
+  ts: true,
+  c43: false,
+  ori: "h",
+  wm: "",
+  ws: null,
+  busy: false,
+  pending: 0,           // 尚未结束的任务数
+  finished: new Set(),  // 已结束的 jobId
+  doneFiles: new Set(), // 本次会话已成功处理的文件序号
+  pollTimer: null,
+  outPath: localStorage.getItem("retro00_out") || "",
+};
+
+function fmtEta(sec) {
+  sec = Math.max(0, Math.round(sec));
+  if (sec < 60) return sec + " 秒";
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m + " 分 " + s + " 秒";
+}
+function fmtSize(n) {
+  if (n < 1024) return n + " B";
+  if (n < 1048576) return (n / 1024).toFixed(1) + " KB";
+  if (n < 1073741824) return (n / 1048576).toFixed(1) + " MB";
+  return (n / 1073741824).toFixed(2) + " GB";
+}
+
+function kindOf(name) {
+  const ext = name.split(".").pop().toLowerCase();
+  const imgs = ["jpg","jpeg","png","bmp","webp","gif","dng","cr2","cr3","nef","arw","raf","orf","rw2","pef","srw","heic","heif"];
+  return imgs.includes(ext) ? "photo" : "video";
+}
+
+function isRawExt(name) {
+  const ext = name.split(".").pop().toLowerCase();
+  return ["dng","cr2","cr3","nef","arw","raf","orf","rw2","pef","srw","heic","heif"].includes(ext);
+}
+
+const STYLES = [
+  { key: "dv",   name: "复古DV",       desc: "默认质感：画质100 / 年代感70 / 不裁切" },
+  { key: "1413", name: "复古DV（较清晰）", desc: "画质100 / 年代感70 / 不裁切，后缀 00年代DV（较清晰）" },
+];
+
+function setQuality(v) { state.quality = v; $("quality").value = v; $("qv").textContent = v; }
+function setStrength(v) { state.strength = v; $("strength").value = v; $("sv").textContent = v; }
+
+function renderPresets() {
+  const box = $("presets");
+  if (!box) return;
+  box.innerHTML = "";
+  STYLES.forEach(p => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "preset" + (p.key === state.preset ? " sel" : "");
+    b.innerHTML = "<b>" + p.name + "</b><span>" + p.desc + "</span>";
+    b.onclick = () => applyStyle(p.key);
+    box.appendChild(b);
+  });
+}
+
+function applyStyle(key) {
+  state.preset = key;
+  localStorage.setItem("retro00_style", key);
+  renderPresets();
+  setQuality(100);
+  setStrength(70);
+  $("tsChk").checked = true; state.ts = true;
+  $("wmInput").value = ""; state.wm = "";   // 水印默认 = 处理时的时间
+  state.c43 = false; $("c43Chk").checked = false;  // 两种风格都默认不裁切
+  state.ori = "h";
+  document.querySelector('input[name="ori"][value="h"]').checked = true;
+  updateOriDisabled();
+}
+
+/* ---------- 文件列表 ---------- */
+function renderFiles() {
+  const box = $("files");
+  box.innerHTML = "";
+  if (!state.files.length) {
+    box.innerHTML = '<div class="empty">还没有文件</div>';
+    return;
+  }
+  state.files.forEach((f, i) => {
+    const row = document.createElement("div");
+    row.className = "frow";
+    row.dataset.idx = i;
+    const kind = kindOf(f.name);
+    const stDone = state.doneFiles.has(i);
+    let thumb = "";
+    if (kind === "photo") {
+      if (isRawExt(f.name)) {
+        thumb = '<div class="thumb" style="display:flex;align-items:center;justify-content:center;font-size:22px">📷</div>';
+      } else {
+        thumb = '<img class="thumb" src="' + URL.createObjectURL(f) + '" alt="">';
+      }
+    } else {
+      thumb = '<video class="thumb" muted preload="metadata" src="' + URL.createObjectURL(f) + '"></video>';
+    }
+    row.innerHTML =
+      thumb +
+      '<div class="fmeta">' +
+        '<div class="fname">' + f.name + '</div>' +
+        '<div class="fsub">' +
+          '<span class="chip ' + kind + '">' + (kind === "photo" ? "照片" : "视频") + '</span>' +
+          '<span>' + fmtSize(f.size) + '</span>' +
+          '<span class="st' + (stDone ? " done" : "") + '" data-st="' + i + '">' + (stDone ? "已完成 ✓" : "就绪") + '</span>' +
+          '<span class="mini"><i data-mini="' + i + '"></i></span>' +
+        '</div>' +
+      '</div>';
+    box.appendChild(row);
+  });
+}
+
+function setFileStatus(i, text, cls, pct) {
+  const box = $("files");
+  const row = box.querySelector('[data-idx="' + i + '"]');
+  if (!row) return;
+  const st = row.querySelector('[data-st="' + i + '"]');
+  st.textContent = text;
+  st.className = "st" + (cls ? " " + cls : "");
+  if (typeof pct === "number") {
+    row.querySelector('[data-mini="' + i + '"]').style.width = Math.max(0, Math.min(100, pct)) + "%";
+  }
+}
+
+/* ---------- 上传（XHR，带进度） ---------- */
+function uploadFile(file, idx) {
+  return new Promise((resolve, reject) => {
+    const params = new URLSearchParams({
+      filename: file.name,
+      preset: "dv",
+      style: state.preset,
+      quality: state.quality,
+      strength: state.strength,
+      wm_on: state.ts ? "1" : "0",
+      wm: state.wm,
+      c4: state.c43 ? "1" : "0",
+      ori: state.ori,
+      out: state.outPath,
+    });
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/convert?" + params.toString());
+    xhr.responseType = "text";
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        setFileStatus(idx, "上传中 " + Math.round(e.loaded / e.total * 100) + "%", "running",
+                       e.loaded / e.total * 100);
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText));
+        } catch (e) {
+          reject(new Error("服务器响应解析失败"));
+        }
+      } else {
+        let msg = "HTTP " + xhr.status;
+        try { msg = xhr.responseText || msg; } catch (e) {}
+        reject(new Error(msg));
+      }
+    };
+    xhr.onerror = () => reject(new Error("网络错误（请确认是通过「启动00年代转换器.bat」打开的页面）"));
+    xhr.onabort = () => reject(new Error("已中止"));
+    xhr.send(file);
+  });
+}
+
+async function startAll() {
+  if (state.busy || !state.files.length) return;
+  const todo = state.files.filter((f, i) => !state.doneFiles.has(i));
+  if (!todo.length) {
+    finishRun("列表中的文件都已处理过。如需重新转换，请先「清空列表」再重新添加文件");
+    return;
+  }
+  state.busy = true;
+  state.pending = 0;
+  state.finished = new Set();
+  $("startBtn").disabled = true;
+  $("cancelBtn").disabled = false;
+  $("pinfo").textContent = "上传文件中…";
+  let ok = 0, fail = 0;
+  for (let i = 0; i < state.files.length; i++) {
+    if (state.doneFiles.has(i)) continue;
+    const f = state.files[i];
+    setFileStatus(i, "上传中 0%", "running", 0);
+    try {
+      const r = await uploadFile(f, i);
+      state.fileJob[r.job_id] = i;
+      state.pending++;
+      setFileStatus(i, "已上传，排队中…", "");
+      ok++;
+    } catch (e) {
+      fail++;
+      setFileStatus(i, "上传失败", "error");
+    }
+  }
+  if (ok === 0) {
+    finishRun("全部上传失败，请检查文件格式或服务状态");
+    return;
+  }
+  startPolling();
+  $("pinfo").textContent = "已加入队列 " + ok + " 个任务" + (fail ? "，失败 " + fail + " 个" : "") + "，正在处理…";
+}
+
+/* ---------- 状态轮询兜底 ---------- */
+function startPolling() {
+  stopPolling();
+  state.pollTimer = setInterval(async () => {
+    try {
+      const r = await fetch("/api/jobs");
+      const data = await r.json();
+      data.jobs.forEach(applyJob);
+    } catch (e) {}
+  }, 2000);
+}
+
+function stopPolling() {
+  if (state.pollTimer) {
+    clearInterval(state.pollTimer);
+    state.pollTimer = null;
+  }
+}
+
+/* ---------- WebSocket（断线自动重连） ---------- */
+function connectWS() {
+  if (state.ws && (state.ws.readyState === WebSocket.OPEN || state.ws.readyState === WebSocket.CONNECTING)) {
+    return;
+  }
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  const ws = new WebSocket(proto + "://" + location.host + "/ws/progress");
+  state.ws = ws;
+  ws.onmessage = (ev) => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch (e) { return; }
+    if (msg.type === "snapshot") {
+      msg.jobs.forEach(applyJob);
+      return;
+    }
+    if (msg.job) applyJob(msg.job);
+  };
+  ws.onclose = () => {
+    state.ws = null;
+    setTimeout(connectWS, 1500);
+  };
+  ws.onerror = () => { try { ws.close(); } catch (e) {} };
+}
+
+/* ---------- 任务状态 ---------- */
+function applyJob(job) {
+  const idx = state.fileJob[job.id];
+  if (idx === undefined) return;
+  if (job.status === "running") {
+    state.activeJob = job.id;
+    setFileStatus(idx, Math.round(job.percent) + "%", "running", job.percent);
+    $("pbar").style.width = job.percent + "%";
+    let etaTxt = "";
+    if (typeof job.eta_seconds === "number" && isFinite(job.eta_seconds) && job.eta_seconds >= 0) {
+      etaTxt = " · 预计剩余 " + fmtEta(job.eta_seconds);
+    } else if (job.percent > 0) {
+      etaTxt = " · 剩余时间计算中…";
+    }
+    let qTxt = "";
+    if (state.pending > 1) qTxt = " · 队列中还有 " + (state.pending - 1) + " 个";
+    $("pinfo").textContent = "正在处理：" + job.file_name + "  " + Math.round(job.percent) + "%" + etaTxt + qTxt;
+  } else if (job.status === "queued") {
+    setFileStatus(idx, "排队中…", "");
+  } else if (job.status === "done") {
+    state.activeJob = null;
+    state.doneFiles.add(idx);
+    setFileStatus(idx, "完成 ✓", "done", 100);
+    if (job.output_abs) addResult(job);
+    jobEnded(job);
+  } else if (job.status === "error") {
+    state.activeJob = null;
+    setFileStatus(idx, "失败", "error");
+    $("pinfo").textContent = "任务失败：" + job.file_name + " — " + (job.error || "未知错误");
+    jobEnded(job);
+  } else if (job.status === "cancelled") {
+    state.activeJob = null;
+    setFileStatus(idx, "已取消", "error");
+    $("pinfo").textContent = "已取消：" + job.file_name;
+    jobEnded(job);
+  }
+}
+
+function jobEnded(job) {
+  if (state.finished.has(job.id)) return;
+  state.finished.add(job.id);
+  state.pending = Math.max(0, state.pending - 1);
+  if (state.busy && state.pending === 0) {
+    finishRun("全部完成 🎉");
+  }
+}
+
+function finishRun(msg) {
+  state.busy = false;
+  stopPolling();
+  $("startBtn").disabled = false;
+  $("cancelBtn").disabled = true;
+  $("pbar").style.width = "0%";
+  if (msg) $("pinfo").textContent = msg;
+}
+
+/* ---------- 结果 ---------- */
+function addResult(job) {
+  const box = $("results");
+  const empty = box.querySelector(".empty");
+  if (empty) empty.remove();
+  const div = document.createElement("div");
+  div.className = "res";
+  const name = job.file_name;
+  const kind = job.kind;
+  const url = "/output2/" + job.id;
+  const media = kind === "photo"
+    ? '<img loading="lazy" src="' + url + '" alt="">'
+    : '<video controls preload="metadata" src="' + url + '"></video>';
+  div.innerHTML = media +
+    '<div class="rtitle"><span>' + name + '</span>' +
+    '<span><a href="' + url + '" download>下载</a> · <a href="' + url + '" target="_blank">打开</a></span></div>';
+  box.prepend(div);
+}
+
+/* ---------- 取消 ---------- */
+async function cancelCurrent() {
+  if (!state.activeJob) return;
+  try {
+    await fetch("/api/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job_id: state.activeJob }),
+    });
+  } catch (e) {}
+}
+
+/* ---------- 事件绑定 ---------- */
+function addFiles(list) {
+  for (const f of list) {
+    if (!state.files.some(x => x.name === f.name && x.size === f.size)) {
+      state.files.push(f);
+    }
+  }
+  renderFiles();
+  if (!state.busy) {
+    $("pinfo").textContent = "已添加 " + state.files.length + " 个文件，点「开始转换」即可处理";
+  }
+}
+
+const drop = $("drop");
+drop.onclick = () => $("picker").click();
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("drag"); };
+drop.ondragleave = () => drop.classList.remove("drag");
+drop.ondrop = (e) => {
+  e.preventDefault();
+  drop.classList.remove("drag");
+  if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]);
+};
+$("picker").onchange = (e) => {
+  if (e.target.files.length) addFiles([...e.target.files]);
+  e.target.value = "";
+};
+$("startBtn").onclick = startAll;
+$("cancelBtn").onclick = cancelCurrent;
+$("clearBtn").onclick = () => {
+  state.files = [];
+  state.fileJob = {};
+  state.finished = new Set();
+  state.doneFiles = new Set();
+  state.pending = 0;
+  renderFiles();
+};
+$("quality").oninput = (e) => { state.quality = +e.target.value; $("qv").textContent = e.target.value; };
+$("strength").oninput = (e) => { state.strength = +e.target.value; $("sv").textContent = e.target.value; };
+$("tsChk").onchange = (e) => { state.ts = e.target.checked; };
+function updateOriDisabled() {
+  const off = !state.c43;
+  document.querySelectorAll('input[name="ori"]').forEach(r => { r.disabled = off; });
+}
+$("c43Chk").onchange = (e) => { state.c43 = e.target.checked; updateOriDisabled(); };
+updateOriDisabled();
+$("advToggle").onclick = () => {
+  const panel = $("advPanel");
+  const open = panel.style.display !== "none";
+  panel.style.display = open ? "none" : "block";
+  $("advToggle").textContent = open ? "▸ 展开高级调节（画质 / 年代感强度）" : "▾ 收起高级调节";
+};
+document.querySelectorAll('input[name="ori"]').forEach(r => {
+  r.onchange = () => { if (r.checked) state.ori = r.value; };
+});
+$("wmInput").oninput = (e) => { state.wm = e.target.value; };
+$("outPath").value = state.outPath;
+$("outPath").onchange = (e) => {
+  state.outPath = e.target.value.trim() || "";
+  localStorage.setItem("retro00_out", state.outPath);
+};
+let dirCurrent = state.outPath;
+async function openPicker() {
+  $("dirModal").style.display = "flex";
+  await loadDirs(state.outPath);
+}
+async function loadDirs(path) {
+  dirCurrent = path;
+  $("dirCurrent").textContent = path;
+  $("dirList").innerHTML = '<div class="empty">加载中…</div>';
+  try {
+    const r = await fetch("/api/dirs?path=" + encodeURIComponent(path));
+    if (!r.ok) { $("dirList").innerHTML = '<div class="empty">无法读取该目录</div>'; return; }
+    const data = await r.json();
+    const box = $("dirList");
+    box.innerHTML = "";
+    if (!data.dirs.length) {
+      box.innerHTML = '<div class="empty">（没有子文件夹）</div>';
+    }
+    data.dirs.forEach(name => {
+      const b = document.createElement("button");
+      b.textContent = "📁 " + name;
+      b.onclick = () => loadDirs(dirCurrent.replace(/[\\/]+$/, "") + "\\" + name);
+      box.appendChild(b);
+    });
+  } catch (e) { $("dirList").innerHTML = '<div class="empty">加载失败</div>'; }
+}
+$("browseBtn").onclick = openPicker;
+$("dirUp").onclick = async () => {
+  try {
+    const r = await fetch("/api/dirs?path=" + encodeURIComponent(dirCurrent));
+    const data = await r.json();
+    if (data.parent) await loadDirs(data.parent);
+  } catch (e) {}
+};
+$("dirSelect").onclick = () => {
+  state.outPath = dirCurrent;
+  $("outPath").value = dirCurrent;
+  localStorage.setItem("retro00_out", dirCurrent);
+  $("dirModal").style.display = "none";
+};
+$("dirCancel").onclick = () => { $("dirModal").style.display = "none"; };
+
+fetch("/api/config").then(r => r.json()).then(d => {
+  if (d.version && d.version !== PAGE_VERSION) $("verWarn").style.display = "block";
+  if (!state.outPath && d.default_out) {
+    state.outPath = d.default_out;
+    $("outPath").value = d.default_out;
+  }
+}).catch(() => {});
+renderPresets();
+applyStyle(localStorage.getItem("retro00_style") || "dv");
+renderFiles();
+connectWS();
+</script>
+</body>
+</html>

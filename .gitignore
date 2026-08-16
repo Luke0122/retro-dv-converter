@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+tmp/
+输出/
+logs/
+*.log
+.env

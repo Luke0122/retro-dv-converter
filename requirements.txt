@@ -1,0 +1,5 @@
+tornado>=6.4
+Pillow>=10.0
+numpy>=1.26
+rawpy>=0.19
+pillow-heif>=0.16
