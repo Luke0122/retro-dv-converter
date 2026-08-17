@@ -23,6 +23,22 @@ from processor import PRESETS, Cancelled, classify, process_photo, process_video
 
 APP_DIR = Path(__file__).resolve().parent
 STATIC_DIR = APP_DIR / "static"
+def _load_env():
+    env_file = APP_DIR / ".env"
+    if env_file.exists():
+        try:
+            for line in env_file.read_text(encoding="utf-8-sig").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
+        except OSError:
+            pass
+
+
+_load_env()
+
 OUT_ROOT = Path(os.environ.get("RETRO00_OUT") or (APP_DIR / "输出"))
 PHOTO_OUT = OUT_ROOT
 VIDEO_OUT = OUT_ROOT

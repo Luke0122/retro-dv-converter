@@ -26,6 +26,7 @@ Convert photos & videos to a 2000s-era retro DV camcorder look: yellow-green haz
 - `RETRO00_OUT`：默认输出目录（未设置时使用程序目录下的 `输出`）
 - `FFMPEG_PATH` / `FFPROBE_PATH`：ffmpeg / ffprobe 可执行文件路径
 - `PYTHONW`：启动脚本使用的 pythonw 路径（可选）
+- 程序目录下的 `.env` 文件（已被 .gitignore 忽略）：本地配置，可放任意环境变量，例如 `RETRO00_OUT=D:\我的输出目录`
 
 ## 使用说明
 详细中文使用说明见 `使用说明.txt`。
