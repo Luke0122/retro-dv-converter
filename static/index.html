@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>00年代时光机</title>
+<title>retro-dv-converter</title>
 <style>
   :root {
     --bg1: #0b1220;
@@ -138,7 +138,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="verwarn" id="verWarn" style="display:none">⚠ 页面与服务器版本不一致：请关闭工具窗口（或结束 pythonw.exe）后，重新双击「启动00年代转换器.bat」，并 Ctrl+F5 刷新本页</div>
+  <div class="verwarn" id="verWarn" style="display:none">⚠ 页面与服务器版本不一致：请关闭工具窗口（或结束 pythonw.exe）后，重新双击「启动retro-dv-converter.bat」，并 Ctrl+F5 刷新本页</div>
 
   <div class="grid">
     <div class="card">
@@ -230,10 +230,10 @@
 
 <script>
 "use strict";
-const PAGE_VERSION = "2026-08-18-v2";
+const PAGE_VERSION = "2026-08-18-v4";
 
 if (location.protocol === "file:") {
-  document.getElementById("pinfo").textContent = "⚠ 请通过「启动00年代转换器.bat」打开本工具，不要直接双击 index.html";
+  document.getElementById("pinfo").textContent = "⚠ 请通过「启动retro-dv-converter.bat」打开本工具，不要直接双击 index.html";
   document.getElementById("startBtn").disabled = true;
 }
 
@@ -414,7 +414,7 @@ function uploadFile(file, idx) {
         reject(new Error(msg));
       }
     };
-    xhr.onerror = () => reject(new Error("网络错误（请确认是通过「启动00年代转换器.bat」打开的页面）"));
+    xhr.onerror = () => reject(new Error("网络错误（请确认是通过「启动retro-dv-converter.bat」打开的页面）"));
     xhr.onabort = () => reject(new Error("已中止"));
     xhr.send(file);
   });

@@ -19,7 +19,7 @@ Convert photos & videos to a 2000s-era retro DV camcorder look: yellow-green haz
 - 安装依赖：`pip install -r requirements.txt`
 
 ## 运行 Run
-- Windows：双击 `启动00年代转换器.bat`（自动打开浏览器 http://127.0.0.1:8765）
+- Windows：双击 `启动retro-dv-converter.bat`（自动打开浏览器 http://127.0.0.1:8765）
 - 命令行：`python server.py`
 
 ## 环境变量 Environment Variables

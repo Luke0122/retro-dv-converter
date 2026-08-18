@@ -32,7 +32,7 @@ def _load_env():
                 if not line or line.startswith("#") or "=" not in line:
                     continue
                 k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip())
+                os.environ[k.strip()] = v.strip()
         except OSError:
             pass
 
@@ -45,7 +45,7 @@ VIDEO_OUT = OUT_ROOT
 LOG_DIR = OUT_ROOT / "logs"
 TMP_DIR = APP_DIR / "tmp"
 
-APP_VERSION = "2026-08-18-v2"
+APP_VERSION = "2026-08-18-v4"
 
 MAIN_IOLOOP = None
 ws_clients = set()
