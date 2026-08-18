@@ -45,7 +45,7 @@ VIDEO_OUT = OUT_ROOT
 LOG_DIR = OUT_ROOT / "logs"
 TMP_DIR = APP_DIR / "tmp"
 
-APP_VERSION = "2026-08-18-v1"
+APP_VERSION = "2026-08-18-v2"
 
 MAIN_IOLOOP = None
 ws_clients = set()
@@ -143,7 +143,7 @@ def worker_loop():
             folder = Path(job.output_dir) if job.output_dir else OUT_ROOT
             ext = ".jpg" if job.kind == "photo" else ".mp4"
             stem = Path(job.file_name).stem or "未命名"
-            tag = "_00年代CCD" if job.style == "ccd" else "_00年代DV"
+            tag = "_CCD" if job.style == "ccd" else "_DV"
             dest = unique_path(folder, stem, ext, tag)
 
             def progress_cb(pct):

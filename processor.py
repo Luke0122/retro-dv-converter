@@ -119,7 +119,7 @@ def target_width(orig_w, strength):
     return w
 
 
-def unique_path(folder, stem, ext, tag="_00年代DV"):
+def unique_path(folder, stem, ext, tag="_DV"):
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     base = folder / f"{stem}{tag}{ext}"
