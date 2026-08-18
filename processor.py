@@ -72,11 +72,11 @@ PRESETS = {
             "saturation": 0.94,
             "contrast": 1.04,
             "brightness": 1.03,
-            "highlight_wash": 1.15,
-            "grain_base": 3.0,
-            "grain_per": 6.0,
-            "vignette": 0.10,
-            "vignette_start": 0.20,
+            "highlight_wash": 1.25,
+            "grain_base": 2.5,
+            "grain_per": 4.0,
+            "vignette": 0.06,
+            "vignette_start": 0.25,
             "vignette_smooth": True,
             "scanline": 0.0,
             "chroma_shift": 0,
@@ -86,9 +86,9 @@ PRESETS = {
         "video": {
             "eq": "contrast=1.04:saturation=0.94:brightness=0.02",
             "colorbalance": "rs=0.07:bs=-0.05:rm=0.02:rh=0.02",
-            "curves": "all='0/0.04 0.5/0.5 1/0.90'",
+            "curves": "all='0/0.04 0.5/0.5 1/0.86'",
             "noise": "soft_chroma",
-            "vignette": "vignette=angle=PI/12",
+            "vignette": "vignette=angle=PI/15",
             "extra": "gblur=sigma=0.7",
             "crf_offset": 0,
         },
@@ -329,8 +329,8 @@ def process_video(in_path, out_path, preset_key, quality, strength, progress=Non
         n_chroma = int(round(8 + 7 * s))
         noise = f"c0s=4:c0f=t:c1s={n_chroma}:c1f=t:c2s={n_chroma}:c2f=t"
     elif preset_key == "ccd":
-        n_chroma = int(round(5 + 6 * s))
-        noise = f"c0s=3:c0f=t:c1s={n_chroma}:c1f=t:c2s={n_chroma}:c2f=t"
+        n_chroma = int(round(4 + 5 * s))
+        noise = f"c0s=2:c0f=t:c1s={n_chroma}:c1f=t:c2s={n_chroma}:c2f=t"
     else:
         n_base, n_per = preset["noise"]
         noise = f"alls={int(round(n_base + n_per * s))}:allf=t"
