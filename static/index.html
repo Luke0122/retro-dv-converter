@@ -25,10 +25,7 @@
   body {
     font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
     color: var(--txt);
-    background:
-      radial-gradient(1200px 600px at 85% -10%, rgba(79,195,247,0.16), transparent 60%),
-      radial-gradient(900px 500px at 5% 110%, rgba(245,166,35,0.12), transparent 60%),
-      linear-gradient(160deg, var(--bg1), var(--bg2) 70%);
+    background: #000;
     min-height: 100vh;
     padding: 24px 20px 40px;
   }
@@ -141,10 +138,6 @@
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>📼 00年代时光机</h1>
-    <span class="sub">照片 / 视频一键穿越回千禧年</span>
-  </header>
   <div class="verwarn" id="verWarn" style="display:none">⚠ 页面与服务器版本不一致：请关闭工具窗口（或结束 pythonw.exe）后，重新双击「启动00年代转换器.bat」，并 Ctrl+F5 刷新本页</div>
 
   <div class="grid">
@@ -237,7 +230,7 @@
 
 <script>
 "use strict";
-const PAGE_VERSION = "2026-08-16-v2";
+const PAGE_VERSION = "2026-08-18-v1";
 
 if (location.protocol === "file:") {
   document.getElementById("pinfo").textContent = "⚠ 请通过「启动00年代转换器.bat」打开本工具，不要直接双击 index.html";
@@ -292,12 +285,17 @@ function isRawExt(name) {
 }
 
 const STYLES = [
-  { key: "dv",   name: "复古DV",       desc: "默认质感：画质100 / 年代感70 / 不裁切" },
-  { key: "1413", name: "复古DV（较清晰）", desc: "画质100 / 年代感70 / 不裁切，后缀 00年代DV（较清晰）" },
+  { key: "dv",  name: "DV",  desc: "复古DV磁带：黄绿灰雾、彩噪、抖动、柔化" },
+  { key: "ccd", name: "CCD", desc: "千禧CCD卡片机：暖调、细颗粒、暗角" },
 ];
 
 function setQuality(v) { state.quality = v; $("quality").value = v; $("qv").textContent = v; }
 function setStrength(v) { state.strength = v; $("strength").value = v; $("sv").textContent = v; }
+function nowStamp() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "/" + p(d.getMonth() + 1) + "/" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+}
 
 function renderPresets() {
   const box = $("presets");
@@ -320,8 +318,9 @@ function applyStyle(key) {
   setQuality(100);
   setStrength(70);
   $("tsChk").checked = true; state.ts = true;
-  $("wmInput").value = ""; state.wm = "";   // 水印默认 = 处理时的时间
-  state.c43 = false; $("c43Chk").checked = false;  // 两种风格都默认不裁切
+  state.wm = nowStamp();
+  $("wmInput").value = state.wm;   // 默认显示当前时间
+  state.c43 = false; $("c43Chk").checked = false;
   state.ori = "h";
   document.querySelector('input[name="ori"][value="h"]').checked = true;
   updateOriDisabled();
@@ -383,7 +382,7 @@ function uploadFile(file, idx) {
   return new Promise((resolve, reject) => {
     const params = new URLSearchParams({
       filename: file.name,
-      preset: "dv",
+      preset: state.preset,
       style: state.preset,
       quality: state.quality,
       strength: state.strength,

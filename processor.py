@@ -65,6 +65,31 @@ PRESETS = {
             "crf_offset": 1,
         },
     },
+    "ccd": {
+        "name": "千禧CCD",
+        "photo": {
+            "rgb_gain": (1.045, 1.005, 0.985),
+            "saturation": 1.16,
+            "contrast": 1.12,
+            "brightness": 1.00,
+            "grain_base": 2.0,
+            "grain_per": 5.0,
+            "vignette": 0.42,
+            "scanline": 0.0,
+            "chroma_shift": 0,
+            "soften": 0.5,
+            "jpeg_bias": 0,
+        },
+        "video": {
+            "eq": "contrast=1.12:saturation=1.16:brightness=0.008",
+            "colorbalance": "rs=0.06:bs=-0.04:rm=0.02:rh=0.015",
+            "curves": "all='0/0.03 0.5/0.5 1/0.97'",
+            "noise": (4, 5),
+            "vignette": "vignette=PI/5",
+            "extra": "gblur=sigma=0.4",
+            "crf_offset": 0,
+        },
+    },
 }
 
 
@@ -280,7 +305,8 @@ def process_video(in_path, out_path, preset_key, quality, strength, progress=Non
     else:
         parts.append(f"scale={FIT_W}:{FIT_H}:force_original_aspect_ratio=decrease")
         parts.append("scale=trunc(iw/2)*2:trunc(ih/2)*2")
-    parts.append("crop=iw:ih-6:x=0:y='2+2*sin(n/7)',scale=iw:ih+6")
+    if preset_key == "dv":
+        parts.append("crop=iw:ih-6:x=0:y='2+2*sin(n/7)',scale=iw:ih+6")
     parts.append("format=yuv420p")
     if preset["eq"]:
         parts.append(f"eq={preset['eq']}")
@@ -288,15 +314,20 @@ def process_video(in_path, out_path, preset_key, quality, strength, progress=Non
         parts.append(f"colorbalance={preset['colorbalance']}")
     if preset["curves"]:
         parts.append(f"curves={preset['curves']}")
-    n_chroma = int(round(8 + 7 * s))
-    noise = f"c0s=4:c0f=t:c1s={n_chroma}:c1f=t:c2s={n_chroma}:c2f=t"
+    if preset_key == "dv":
+        n_chroma = int(round(8 + 7 * s))
+        noise = f"c0s=4:c0f=t:c1s={n_chroma}:c1f=t:c2s={n_chroma}:c2f=t"
+    else:
+        n_base, n_per = preset["noise"]
+        noise = f"alls={int(round(n_base + n_per * s))}:allf=t"
     parts.append(f"noise={noise}")
     if preset["vignette"]:
         parts.append(preset["vignette"])
     if preset["extra"]:
         parts.append(preset["extra"])
     parts.append(f"fps={VIDEO_FPS}")
-    parts.append("scale=iw*0.5:ih*0.5,scale=iw*2:ih*2:flags=neighbor,gblur=sigma=0.7")
+    if preset_key == "dv":
+        parts.append("scale=iw*0.5:ih*0.5,scale=iw*2:ih*2:flags=neighbor,gblur=sigma=0.7")
     vf = ",".join(parts)
     crf = int(round(45 - 0.22 * float(quality) + preset["crf_offset"]))
     crf = max(18, min(51, crf))
@@ -418,6 +449,18 @@ def selftest(out_dir):
     vok = (vw, vh) == (H_W, H_H) and v_out.stat().st_size < src_vid.stat().st_size
     print(f"[视频:横版4:3] {v_out.name} {vw}x{vh} OK={vok}")
     all_ok = all_ok and vok
+    p_out = out / "照片_ccd.jpg"
+    process_photo(src_img, p_out, "ccd", 40, 0.7, watermark=wm)
+    w, h = Image.open(p_out).size
+    okc = p_out.stat().st_size < src_img.stat().st_size
+    print(f"[照片:ccd] {p_out.name} {w}x{h} 压缩OK={okc}")
+    all_ok = all_ok and okc
+    v_out = out / "视频_ccd.mp4"
+    process_video(src_vid, v_out, "ccd", 40, 0.7, watermark=wm, crop_4to3=True)
+    vw, vh = _probe_size(v_out) or (0, 0)
+    vokc = (vw, vh) == (H_W, H_H) and v_out.stat().st_size < src_vid.stat().st_size
+    print(f"[视频:ccd] {v_out.name} {vw}x{vh} 4:3OK={vokc}")
+    all_ok = all_ok and vokc
     v16 = out / "视频_dv_16x9.mp4"
     process_video(src_vid, v16, "dv", 40, 0.7, watermark=wm, crop_4to3=False)
     vw, vh = _probe_size(v16) or (0, 0)

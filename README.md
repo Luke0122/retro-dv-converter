@@ -5,7 +5,7 @@ Convert photos & videos to a 2000s-era retro DV camcorder look: yellow-green haz
 
 ## 功能 Features
 - 照片与视频统一处理，输出 MP4 / JPG
-- 两种参数风格：复古DV、复古DV（较清晰）
+- 两种风格：DV（复古DV磁带）、CCD（千禧CCD），输出后缀分别带 DV / CCD
 - 可选 4:3 横版/竖版裁切，或保持原始比例
 - 可自定义输出目录
 - 点阵 OSD 日期水印（默认自动使用处理文件时的时间）
