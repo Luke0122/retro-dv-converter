@@ -68,27 +68,28 @@ PRESETS = {
     "ccd": {
         "name": "千禧CCD",
         "photo": {
-            "rgb_gain": (1.045, 1.005, 0.985),
-            "saturation": 1.16,
-            "contrast": 1.12,
-            "brightness": 1.00,
-            "grain_base": 2.0,
-            "grain_per": 5.0,
-            "vignette": 0.20,
-            "vignette_start": 0.15,
+            "rgb_gain": (1.06, 1.01, 0.97),
+            "saturation": 0.94,
+            "contrast": 1.04,
+            "brightness": 1.03,
+            "highlight_wash": 1.15,
+            "grain_base": 3.0,
+            "grain_per": 6.0,
+            "vignette": 0.10,
+            "vignette_start": 0.20,
             "vignette_smooth": True,
             "scanline": 0.0,
             "chroma_shift": 0,
-            "soften": 0.5,
+            "soften": 0.8,
             "jpeg_bias": 0,
         },
         "video": {
-            "eq": "contrast=1.12:saturation=1.16:brightness=0.008",
-            "colorbalance": "rs=0.06:bs=-0.04:rm=0.02:rh=0.015",
-            "curves": "all='0/0.03 0.5/0.5 1/0.97'",
-            "noise": (4, 5),
-            "vignette": "vignette=angle=PI/10",
-            "extra": "gblur=sigma=0.4",
+            "eq": "contrast=1.04:saturation=0.94:brightness=0.02",
+            "colorbalance": "rs=0.07:bs=-0.05:rm=0.02:rh=0.02",
+            "curves": "all='0/0.04 0.5/0.5 1/0.90'",
+            "noise": "soft_chroma",
+            "vignette": "vignette=angle=PI/12",
+            "extra": "gblur=sigma=0.7",
             "crf_offset": 0,
         },
     },
@@ -235,6 +236,9 @@ def process_photo(in_path, out_path, preset_key, quality, strength, progress=Non
     if cancel and cancel():
         raise Cancelled()
     arr = np.asarray(pil, dtype=np.float32) / 255.0
+    wash = preset.get("highlight_wash", 1.0)
+    if wash > 1.0:
+        arr = 1.0 - (1.0 - arr) ** wash   # 高光轻微泛白
     h, w = arr.shape[:2]
     sigma = preset["grain_base"] + preset["grain_per"] * max(0.0, min(1.0, float(strength)))
     if sigma > 0:
@@ -324,6 +328,9 @@ def process_video(in_path, out_path, preset_key, quality, strength, progress=Non
     if preset_key == "dv":
         n_chroma = int(round(8 + 7 * s))
         noise = f"c0s=4:c0f=t:c1s={n_chroma}:c1f=t:c2s={n_chroma}:c2f=t"
+    elif preset_key == "ccd":
+        n_chroma = int(round(5 + 6 * s))
+        noise = f"c0s=3:c0f=t:c1s={n_chroma}:c1f=t:c2s={n_chroma}:c2f=t"
     else:
         n_base, n_per = preset["noise"]
         noise = f"alls={int(round(n_base + n_per * s))}:allf=t"
