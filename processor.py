@@ -74,7 +74,9 @@ PRESETS = {
             "brightness": 1.00,
             "grain_base": 2.0,
             "grain_per": 5.0,
-            "vignette": 0.42,
+            "vignette": 0.20,
+            "vignette_start": 0.15,
+            "vignette_smooth": True,
             "scanline": 0.0,
             "chroma_shift": 0,
             "soften": 0.5,
@@ -85,7 +87,7 @@ PRESETS = {
             "colorbalance": "rs=0.06:bs=-0.04:rm=0.02:rh=0.015",
             "curves": "all='0/0.03 0.5/0.5 1/0.97'",
             "noise": (4, 5),
-            "vignette": "vignette=PI/5",
+            "vignette": "vignette=angle=PI/10",
             "extra": "gblur=sigma=0.4",
             "crf_offset": 0,
         },
@@ -246,7 +248,12 @@ def process_photo(in_path, out_path, preset_key, quality, strength, progress=Non
     if v > 0:
         yy, xx = np.mgrid[0:h, 0:w]
         d = np.sqrt(((xx - w / 2) / max(w / 2, 1)) ** 2 + ((yy - h / 2) / max(h / 2, 1)) ** 2)
-        m = np.clip((d - 0.30) / 0.70, 0, 1) ** 1.7
+        v_start = preset.get("vignette_start", 0.30)
+        m = np.clip((d - v_start) / (1.0 - v_start), 0, 1)
+        if preset.get("vignette_smooth", False):
+            m = m * m * (3 - 2 * m)   # smoothstep：羽化拉满
+        else:
+            m = m ** 1.7
         arr *= (1.0 - v * m).astype(np.float32)[..., None]
     arr = np.clip(arr, 0, 1)
     sl = preset["scanline"]
